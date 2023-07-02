@@ -2,6 +2,7 @@ from pydantic import BaseModel, validator
 from starlette.websockets import WebSocket
 
 from tanksonline.models.inp import Vector2
+from tanksonline.models.settings import inst as Settings
 
 
 class PlayerInfRoom(BaseModel):
@@ -27,7 +28,11 @@ class PlayerModel(BaseModel):
 
     @validator("name")
     def check_name(cls, value: str) -> str:
-        assert value.isascii() and 3 <= len(value) <= 8
+        assert (
+            value.isascii()
+            and Settings.room.name_min <= len(value) <= Settings.room.name_max
+            and value.find(" ") == -1
+        )
 
         return value
 

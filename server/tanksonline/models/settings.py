@@ -13,6 +13,8 @@ def json_maps(settings: BaseSettings) -> dict[str, Any]:
 
 class RoomInfo(BaseModel):
     max: int
+    name_min: int
+    name_max: int
 
 
 class Settings(BaseSettings):
@@ -23,7 +25,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
-        env_nested_delimiter = "_"
+        env_nested_delimiter = "__"
 
         @classmethod
         def customise_sources(cls, init_settings, env_settings, file_secret_settings):

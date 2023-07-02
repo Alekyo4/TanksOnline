@@ -41,12 +41,19 @@ class Manager:
         room: Room | None = None
 
         for l_room in reversed(self.rooms):
+            f_p: bool = False
+
             if len(l_room.players) == Settings.room.max:
                 continue
 
             for pl_room in l_room.players:
                 if pl.name == pl_room.name:
-                    continue
+                    f_p = True
+
+                    break
+
+            if f_p:
+                continue
 
             room = l_room
 
@@ -70,9 +77,9 @@ class Manager:
         await room.on(
             EventRef(
                 evt=Evt.PLAYER_JOIN,
+                control=player.room.control,
                 data=PlayerJoinEvent(
                     name=player.name,
-                    control=player.room.control,
                     position=player.position,
                 ),
             )

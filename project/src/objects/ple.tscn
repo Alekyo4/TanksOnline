@@ -1,11 +1,18 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/sprites/tanks_weapon_1.png" type="Texture" id=1]
 [ext_resource path="res://src/sprites/tanks.png" type="Texture" id=2]
 [ext_resource path="res://src/scripts/ple.gd" type="Script" id=3]
+[ext_resource path="res://src/fonts/Roboto-Black.ttf" type="DynamicFontData" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 21, 21 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 12
+use_filter = true
+extra_spacing_char = 1
+font_data = ExtResource( 4 )
 
 [node name="PLE" type="KinematicBody2D"]
 script = ExtResource( 3 )
@@ -25,3 +32,17 @@ texture = ExtResource( 1 )
 offset = Vector2( 10, 0 )
 vframes = 2
 frame = 1
+
+[node name="PShoot" type="Position2D" parent="Weapon"]
+position = Vector2( 25, 0 )
+
+[node name="Nickname" type="Label" parent="."]
+margin_left = -32.0
+margin_top = 24.0
+margin_right = 32.0
+margin_bottom = 39.0
+custom_colors/font_color = Color( 0.109804, 0.101961, 0.0784314, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "Jorge"
+align = 1
+valign = 1

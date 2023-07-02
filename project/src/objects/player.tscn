@@ -24,6 +24,9 @@ texture = ExtResource( 2 )
 offset = Vector2( 10, 0 )
 vframes = 2
 
+[node name="PShoot" type="Position2D" parent="Weapon"]
+position = Vector2( 25, 0 )
+
 [node name="Camera" type="Camera2D" parent="."]
 current = true
 zoom = Vector2( 0.8, 0.8 )
@@ -32,3 +35,7 @@ limit_top = 0
 smoothing_enabled = true
 
 [node name="Rot" type="Position2D" parent="."]
+
+[node name="Shot" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true

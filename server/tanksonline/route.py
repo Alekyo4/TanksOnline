@@ -55,11 +55,15 @@ async def room_connect(ws: WebSocket) -> None:
         try:
             try:
                 e: EventRef = EventRef(**(await ws.receive_json(mode="binary")))
+
+                if not e.control:
+                    raise TypeError
             except WebSocketDisconnect:
                 await room.on(
                     EventRef(
                         evt=Evt.PLAYER_EXIT,
-                        data=PlayerExitEvent(control=player.room.control),
+                        control=player.room.control,
+                        data=PlayerExitEvent(),
                     )
                 )
 
@@ -72,7 +76,7 @@ async def room_connect(ws: WebSocket) -> None:
                 ev: Evt = getattr(Evt, e.evt.upper())  # type: ignore
                 evt: Any = ev.value(**e.data)
 
-                await room.on(EventRef(evt=ev, data=evt))
+                await room.on(EventRef(evt=ev, data=evt, control=player.room.control))
             except AttributeError:
                 raise TypeError
 

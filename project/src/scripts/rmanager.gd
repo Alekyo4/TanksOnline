@@ -5,8 +5,6 @@ const SERVER_URL: String = "ws://localhost:8080"
 var ws: WebSocketClient = WebSocketClient.new()
 var client: WebSocketPeer
 
-var ple_resource: PackedScene = preload("res://src/objects/ple.tscn")
-
 var player: Dictionary
 
 var game: Node
@@ -30,6 +28,9 @@ func join(player_name: String) -> void:
 	
 	var data: Dictionary = recv()
 	
+	if not data:
+		return
+	
 	player = data["self"]
 	
 	var map: Node2D = load("res://src/scenes/maps/%s.tscn" % player["room"]["map_name"]).instance()
@@ -41,7 +42,7 @@ func join(player_name: String) -> void:
 	
 	game = get_tree().current_scene
 	
-	var pl: KinematicBody2D = load("res://src/objects/player.tscn").instance()
+	var pl: KinematicBody2D = RES.player.instance()
 	
 	pl.position = Vector2(
 		player["position"]["x"],
@@ -65,14 +66,16 @@ func get_ple(name: String) -> KinematicBody2D:
 	return null
 
 func add_ple(data: Dictionary) -> void:
-	var ple: KinematicBody2D = ple_resource.instance()
+	var ple: KinematicBody2D = RES.ple.instance()
+
+	ple.nickname = data["name"]
 	
-	ple.name = "ple_%s" % data["name"]
-	
-	ple.position = Vector2(
+	ple.pos = Vector2(
 		data["position"]["x"],
 		data["position"]["y"]
 	)
+	
+	ple.position = ple.pos
 	
 	game.add_child(ple)
 	players.append(ple)
@@ -83,7 +86,7 @@ func remove_ple(name: String) -> void:
 	ple.queue_free()
 	
 	players.erase(ple)
-	
+
 func recv() -> Dictionary:
 	var s: String = client.get_packet().get_string_from_utf8()
 	var rs: Dictionary = JSON.parse(s).result
@@ -103,19 +106,19 @@ func send(data: Dictionary) -> void:
 func send_evt(evt: String, data: Dictionary) -> void:
 	send({
 		"evt": evt,
+		"control": player["room"]["control"],
 		"data": data
 	})
 
 func _received_evt() -> void:
 	var data: Dictionary = recv()
-	
+
 	var f: String = "_evt_%s" % data["evt"].to_lower()
 
 	if not has_method(f):
 		return
-
-	if has_method(f):
-		call(f, data["data"])
+	
+	call(f, data["data"])
 
 func _connection_s(_p) -> void:
 	client = ws.get_peer(1)
@@ -134,20 +137,37 @@ func _evt_player_join(data: Dictionary) -> void:
 func _evt_player_exit(data: Dictionary) -> void:
 	remove_ple(data["name"])
 
-func _evt_move_aim(data: Dictionary) -> void:
+func _evt_player_respawn(data: Dictionary) -> void:
+	var player: KinematicBody2D = RES.player.instance()
+	
+	player.position = Vector2(
+		data["position"]["x"],
+		data["position"]["y"]
+	)
+	
+	game.add_child(player)
+
+func _evt_player_dead(data: Dictionary) -> void:
+	var ple: KinematicBody2D = get_ple(data["name"])
+
+	remove_ple(data["name"])
+
+func _evt_player_shot(data: Dictionary) -> void:
+	var ple: KinematicBody2D = get_ple(data["name"])
+	
+	ple.shot()
+
+func _evt_player_move_aim(data: Dictionary) -> void:
 	var ple: KinematicBody2D = get_ple(data["name"])
 	
 	ple.aim = data["direction"]
 
-func _evt_move(data: Dictionary) -> void:
+func _evt_player_move(data: Dictionary) -> void:
 	var ple: KinematicBody2D = get_ple(data["name"])
 	
-	ple.rot = Vector2(
-		data["rot"]["x"],
-		data["rot"]["y"]
-	)
+	ple.rot = data["rot"]
 	
-	ple.position = Vector2(
+	ple.pos = Vector2(
 		data["position"]["x"],
 		data["position"]["y"]
 	)
