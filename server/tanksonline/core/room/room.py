@@ -1,3 +1,5 @@
+from random import randrange
+
 from tanksonline.actions import JsonRes
 from tanksonline.models import EventRef, Evt, MapModel, PlayerModel, PlayerRef
 from tanksonline.models.event import (PlayerExitEvent, PlayerJoinEvent,
@@ -48,7 +50,11 @@ class Room:
 
     async def _on_player_dead(self, e: PlayerShotEvent, player: PlayerModel) -> None:
         data: PlayerJoinEvent = PlayerJoinEvent(
-            name=player.name, position=Vector2(x=128, y=128)
+            name=player.name,
+            position=Vector2(
+                x=randrange(64, self.map.size.x - 64),
+                y=randrange(64, self.map.size.y - 64),
+            ),
         )
 
         await self.send_json(
